@@ -32,9 +32,22 @@ const SignUp = () => {
 
       // Redirect or perform any other actions after successful signup and login
       alert('Account created and logged in successfully!');
+      window.location.href = "/";
     } catch (error) {
+
+      if (error.code === 'auth/email-already-in-use') {
+        alert('This email is already in use. Please use a different email.');
+      }
       // Handle error during signup or login
-      console.error('Error creating account or logging in:', error.message);
+
+      else{
+        alert(`Error creating account: ${error.message}`);
+      }
+      
+
+      
+
+      
     }
   };
 

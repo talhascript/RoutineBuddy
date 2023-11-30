@@ -2,26 +2,24 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase-config';
-
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const redirectToHome = () => {
-    // Replace '/home' with the actual path you want to redirect to
-    window.location.href = '/home';
-  };
-
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
       // Sign in user with email and password
       await signInWithEmailAndPassword(auth, email, password);
-
-      // Redirect to home page or perform any other actions after successful login
-      redirectToHome();
+      alert("Successfully Logged In");
+      window.location.href = '/home';
     } catch (error) {
-      // Handle login error
-      console.error('Error logging in:', error.message);
+      // Check if the error is due to a network issue
+      if (error.code === 'auth/network-request-failed') {
+        alert('Network request failed. Please check your internet connection and try again.');
+      } else {
+        alert(`Error logging in: ${error.message}`);
+      }
     }
   };
 
@@ -41,7 +39,7 @@ const Login = () => {
                         <div className="form-outline flex-fill mb-0">
                           <input
                             type="email"
-                            id="form3Example3c"
+                            id="email"
                             className="form-control"
                             placeholder="yourname@gmail.com"
                             onChange={(e) => setEmail(e.target.value)}
@@ -56,7 +54,7 @@ const Login = () => {
                         <div className="form-outline flex-fill mb-0">
                           <input
                             type="password"
-                            id="form3Example4c"
+                            id="password"
                             className="form-control"
                             placeholder="Password123"
                             onChange={(e) => setPassword(e.target.value)}
@@ -66,22 +64,7 @@ const Login = () => {
                           </label>
                         </div>
                       </div>
-                      <div className="form-check d-flex justify-content-center mb-4">
-                        <input
-                          className="form-check-input me-2"
-                          type="checkbox"
-                          value=""
-                          id="form2Example3c"
-                          style={{ borderColor: "black" , borderWidth : "2px" }}
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor="form2Example3"
-                          style={{ border:"" , borderWidth : "5px" }}
-                        >
-                          Remember me
-                        </label>
-                      </div>
+                     
                       <div className="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
                         <button type="submit" className="btn btn-primary btn-lg">
                           Login
@@ -90,6 +73,10 @@ const Login = () => {
                     </form>
                     <p className="text-center">
                       Don't have an account? <Link to="/signup">Sign Up</Link>
+                    </p>
+
+                    <p className="text-center">
+                      Forgot Password? <Link to="/forgot">Click Here</Link>
                     </p>
                   </div>
                   <div className="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
