@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "../../styles/global.css";
-import TodoList from "../../components/TodoList";
+import "../../components/Calendar";
+import Calendar from "../../components/Calendar";
 
-const HomePage = () => {
+const CalendarPage = () => {
   return (
     <>
       <header
@@ -82,7 +83,7 @@ const HomePage = () => {
                 <ul className="nav flex-column mb-auto">
                   <li className="nav-item my-1">
                     <Link
-                      className="nav-link sidebar-options d-flex align-items-baseline gap-2 rounded-pill bg-primary text-white"
+                      className="nav-link text-black sidebar-options d-flex align-items-baseline gap-2 rounded-pill "
                       data-menu="dashboard"
                       to="/home"
                     >
@@ -92,7 +93,7 @@ const HomePage = () => {
                   </li>
                   <li className="nav-item my-1">
                     <Link
-                      className="nav-link text-black sidebar-options d-flex align-items-baseline gap-2 rounded-pill"
+                      className="nav-link sidebar-options d-flex align-items-baseline gap-2 rounded-pill bg-primary text-white"
                       data-menu="approve"
                       to="/calendar"
                     >
@@ -138,7 +139,9 @@ const HomePage = () => {
           </div>
 
           <main class="ms-sm-auto col-lg-10 px-lg-4">
-            <TodoList />
+            <div className="container w-75 py-5">
+              <Calendar />
+            </div>
           </main>
         </div>
       </div>
@@ -146,4 +149,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default CalendarPage;

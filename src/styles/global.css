@@ -1,0 +1,33 @@
+.nav-link:hover {
+  color: #ffffff !important;
+  background-color: #3787ff;
+}
+/* CSS */
+.hidden-buttons {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.list-group-item:hover .hidden-buttons {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (min-width: 992px) {
+  .todolist-width {
+    width: 50% !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .todolist-width {
+    width: 75% !important;
+  }
+}
+
+.navbar-brand {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+  background-color: rgba(0, 0, 0, 0.25);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
+}
