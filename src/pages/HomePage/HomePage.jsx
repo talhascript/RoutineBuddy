@@ -1,47 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/global.css";
 import TodoList from "../../components/TodoList";
+import Navbar from "../../components/Navbar";
+import MyToDos from "../../components/MyToDos";
+
+import {
+  doc,
+  getDocs,
+  onSnapshot,
+  query,
+  where,
+  collection,
+} from "firebase/firestore";
+import { auth, db } from "../../firebase-config";
 
 const HomePage = () => {
+
+
   return (
     <>
-      <header
-        className="navbar sticky-top bg-dark flex-md-nowrap shadow p-0 m-0"
-        data-bs-theme="dark"
-      >
-        <Link
-          className="navbar-brand d-flex col-lg-2 px-3 fs-7 text-white"
-          to="/home"
-        >
-          <i
-            className="bi bi-clipboard2-check-fill px-2"
-            // style={{ fontSize: "x-large", marginRight: "1.2rem" }}
-          ></i>
-          Routine Buddy
-        </Link>
-
-        <ul class="navbar-nav flex-row d-lg-none">
-          <li class="nav-item text-nowrap">
-            <button
-              class="nav-link px-3 text-white bg-dark border-0"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#sidebarMenu"
-              aria-controls="sidebarMenu"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <i class="bi bi-list"></i>
-            </button>
-          </li>
-        </ul>
-
-        <p className="d-lg-flex d-none text-white bg-primary px-3 py-2 rounded-pill my-0 me-3">
-          UserName
-        </p>
-      </header>
-
+      <Navbar />
       <div class="container-fluid">
         <div class="row">
           <div class="sidebar border border-0 col-lg-2 p-0 bg-body-tertiary bg-light">
@@ -104,7 +83,7 @@ const HomePage = () => {
                     <Link
                       className="nav-link text-black sidebar-options d-flex align-items-baseline gap-2 rounded-pill"
                       data-menu="student"
-                      to="/"
+                      to="/completed"
                     >
                       <i className="bi bi-ui-checks"></i>
                       Completed
@@ -120,25 +99,30 @@ const HomePage = () => {
                       Trash
                     </Link>
                   </li>
+
+                  <li className="nav-item my-1">
+                    <div className="me-2 mb-1">
+                      <hr />
+                      <a
+                        className="nav-link text-black d-flex align-items-baseline py-2 mb-2 pe-2 ps-3 gap-2 rounded-pill"
+                        data-menu="sign-out"
+                        href="#"
+                      >
+                        <i className="bi bi-box-arrow-right"></i>
+                        Sign Out
+                      </a>
+                    </div>
+                  </li>
                 </ul>
 
-                <div className="me-2 mb-1">
-                  <hr />
-                  <a
-                    className="nav-link text-black d-flex align-items-baseline py-2 mb-2 pe-2 ps-3 gap-2 rounded-pill"
-                    data-menu="sign-out"
-                    href="#"
-                  >
-                    <i className="bi bi-box-arrow-right"></i>
-                    Sign Out
-                  </a>
-                </div>
+
               </div>
             </div>
           </div>
 
           <main class="ms-sm-auto col-lg-10 px-lg-4">
             <TodoList />
+            <MyToDos />
           </main>
         </div>
       </div>

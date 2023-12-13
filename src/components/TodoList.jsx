@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../firebase-config";
 import "../styles/global.css";
 
 const TodoList = () => {
   const [inputTitle, setInputTitle] = useState("");
   const [inputDescription, setInputDescription] = useState("");
+  const [taskType, setTaskType] = useState("");
+  const [taskDate, setTaskDate] = useState("");
+  const [taskTime, setTaskTime] = useState("");
   const [expandInput, setExpandInput] = useState(false);
-  const [todos, setTodos] = useState([]);
 
   const inputContainerRef = useRef(null);
 
@@ -34,26 +38,57 @@ const TodoList = () => {
     setInputDescription(event.target.value);
   };
 
+  const handleTypeChange = (event) => {
+    setTaskType(event.target.value);
+  };
+
+  const handleDateChange = (event) => {
+    setTaskDate(event.target.value);
+  };
+
+  const handleTimeChange = (event) => {
+    setTaskTime(event.target.value);
+  };
+
   const handleExpandInput = () => {
     setExpandInput(true);
   };
 
-  const handleAddTodo = () => {
-    if (inputTitle.trim() !== "" && inputDescription.trim() !== "") {
-      setTodos([
-        ...todos,
-        { title: inputTitle, description: inputDescription },
-      ]);
-      setInputTitle("");
-      setInputDescription("");
-      setExpandInput(false);
-    }
-  };
+  const handleAddTodo = async () => {
+    try {
+      if (
+        inputTitle.trim() !== "" &&
+        inputDescription.trim() !== "" &&
+        taskType &&
+        taskDate &&
+        taskTime
+      ) {
+        const user = auth.currentUser;
 
-  const handleDeleteTodo = (index) => {
-    const updatedTodos = [...todos];
-    updatedTodos.splice(index, 1);
-    setTodos(updatedTodos);
+        if (user) {
+          // Create a new document in the "Tasks" collection
+          await addDoc(collection(db, "Tasks"), {
+            email: user.email,
+            taskName: inputTitle,
+            taskDesc: inputDescription,
+            taskType: taskType,
+            dateAndTime: new Date(`${taskDate} ${taskTime}`).toISOString(),
+          });
+
+          // Clear the form inputs
+          setInputTitle("");
+          setInputDescription("");
+          setTaskType("");
+          setTaskDate("");
+          setTaskTime("");
+          setExpandInput(false);
+
+          alert ('Task Successfully Added');
+        }
+      }
+    } catch (error) {
+      console.error("Error adding task:", error.message);
+    }
   };
 
   return (
@@ -87,41 +122,52 @@ const TodoList = () => {
               onChange={handleDescriptionChange}
               placeholder="Enter task description..."
             ></textarea>
+            <div className="mb-2">
+              <label htmlFor="taskType" className="form-label">
+                Task Type:
+              </label>
+              <select
+                id="taskType"
+                className="form-select"
+                value={taskType}
+                onChange={handleTypeChange}
+              >
+                <option value="">Select Type</option>
+                <option value="School">School</option>
+                <option value="Personal">Personal</option>
+                <option value="Work">Work</option>
+                <option value="Fitness">Fitness</option>
+              </select>
+            </div>
+            <div className="mb-2">
+              <label htmlFor="taskDate" className="form-label">
+                Task Date:
+              </label>
+              <input
+                type="date"
+                id="taskDate"
+                className="form-control"
+                value={taskDate}
+                onChange={handleDateChange}
+              />
+            </div>
+            <div className="mb-2">
+              <label htmlFor="taskTime" className="form-label">
+                Task Time:
+              </label>
+              <input
+                type="time"
+                id="taskTime"
+                className="form-control"
+                value={taskTime}
+                onChange={handleTimeChange}
+              />
+            </div>
             <button className="btn btn-primary" onClick={handleAddTodo}>
               Add
             </button>
           </>
         )}
-      </div>
-      <hr />
-      <div className="container todolist-width">
-        <ul className="list-group">
-          {todos.map((todo, index) => (
-            <li
-              key={index}
-              className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <h4>{todo.title}</h4>
-                <p>{todo.description}</p>
-              </div>
-              <div className="hidden-buttons">
-                <button
-                  className="btn btn-success mx-1"
-                  onClick={() => handleDeleteTodo(index)}
-                >
-                  <i className="bi bi-check2-square"></i>
-                </button>
-                <button
-                  className="btn btn-danger mx-1"
-                  onClick={() => handleDeleteTodo(index)}
-                >
-                  <i className="bi bi-trash"></i>
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );

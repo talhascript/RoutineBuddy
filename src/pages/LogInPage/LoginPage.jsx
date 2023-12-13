@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase-config";
+import { auth } from "../../firebase-config"; 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +12,14 @@ const Login = () => {
       // Sign in user with email and password
       await signInWithEmailAndPassword(auth, email, password);
       alert("Successfully Logged In");
-      window.location.href = "/home";
+
+          // Extract the username from the email
+      const username = email.split('@')[0];
+
+    // Redirect to HomePage with username as a prop
+      window.location.href = `/home`;
+
+      
     } catch (error) {
       // Check if the error is due to a network issue
       if (error.code === "auth/network-request-failed") {

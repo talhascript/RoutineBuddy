@@ -7,41 +7,7 @@ import Calendar from "../../components/Calendar";
 const CalendarPage = () => {
   return (
     <>
-      <header
-        className="navbar sticky-top bg-dark flex-md-nowrap shadow p-0 m-0"
-        data-bs-theme="dark"
-      >
-        <Link
-          className="navbar-brand d-flex col-lg-2 px-3 fs-7 text-white"
-          to="/home"
-        >
-          <i
-            className="bi bi-clipboard2-check-fill px-2"
-            // style={{ fontSize: "x-large", marginRight: "1.2rem" }}
-          ></i>
-          Routine Buddy
-        </Link>
-
-        <ul class="navbar-nav flex-row d-lg-none">
-          <li class="nav-item text-nowrap">
-            <button
-              class="nav-link px-3 text-white bg-dark border-0"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#sidebarMenu"
-              aria-controls="sidebarMenu"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <i class="bi bi-list"></i>
-            </button>
-          </li>
-        </ul>
-
-        <p className="d-lg-flex d-none text-white bg-primary px-3 py-2 rounded-pill my-0 me-3">
-          UserName
-        </p>
-      </header>
+     
 
       <div class="container-fluid">
         <div class="row">
