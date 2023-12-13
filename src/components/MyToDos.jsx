@@ -1,10 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+  getDoc,
+  addDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { db, auth } from '../firebase-config';
 
 const MyToDos = () => {
   const [todos, setTodos] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editableTask, setEditableTask] = useState(null);
 
   useEffect(() => {
     const fetchUserTodos = async () => {
@@ -12,11 +24,9 @@ const MyToDos = () => {
         const user = auth.currentUser;
 
         if (user) {
-          // Create a query to get tasks where email matches the current user's email
           const q = query(collection(db, 'Tasks'), where('email', '==', user.email));
           const querySnapshot = await getDocs(q);
 
-          // Extract the tasks data from the query snapshot
           const userTodos = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             name: doc.data().taskName,
@@ -37,43 +47,88 @@ const MyToDos = () => {
   }, []);
 
   const handleDeleteTodo = async (id) => {
-    // Implement your delete logic here
     try {
-      await deleteDoc(doc(db, 'Tasks', id));
-      alert(`Delete todo with id ${id}`);
+      const taskDocRef = doc(db, 'Tasks', id);
+      const taskDoc = await getDoc(taskDocRef);
+  
+      if (taskDoc.exists()) {
+        const taskData = taskDoc.data();
+        console.log('Email:', taskData.email);
+        console.log('Task Name:', taskData.taskName);
+  
+        // Create a new document in the "Trash" collection
+        await addDoc(collection(db, 'Trash'), {
+          email: taskData.email,
+          taskName: taskData.taskName,
+          taskDesc: taskData.taskDesc,
+          taskType: taskData.taskType,
+          dateAndTime: taskData.dateAndTime,
+          // Use serverTimestamp for completedOn if needed
+          completedOn: serverTimestamp(),
+        });
+  
+        // Delete the document from the "Tasks" collection
+        await deleteDoc(taskDocRef);
+  
+        // Update the local state to remove the deleted task
+        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      } else {
+        console.error('Task document does not exist');
+      }
     } catch (error) {
       console.error('Error deleting todo:', error.message);
     }
   };
+  
 
   const handleEditTodo = (id) => {
-    // Implement your edit logic here
-    alert(`Edit todo with id ${id}`);
+    setEditableTask(id);
+  };
+
+  const handleUpdateTodo = async (id, updatedTask) => {
+    try {
+      await setDoc(doc(db, 'Tasks', id), updatedTask);
+      setEditableTask(null);
+    } catch (error) {
+      console.error('Error updating todo:', error.message);
+    }
   };
 
   const handleCompleteTodo = async (id) => {
     try {
-      // Get the task data
-      const taskDoc = await doc(db, 'Tasks', id);
-      const taskData = (await getDocs(taskDoc)).data();
+      const taskDocRef = doc(db, 'Tasks', id);
+      const taskDoc = await getDoc(taskDocRef);
 
-      // Create a new document in the "Completed" collection
-      await addDoc(collection(db, 'Completed'), {
-        email: taskData.email,
-        timeDesc: taskData.dateAndTime,
-        taskName: taskData.taskName,
-        taskType: taskData.taskType,
-        dateAndTime: serverTimestamp(),
-        completedOn: serverTimestamp(),
-      });
+      if (taskDoc.exists()) {
+        const taskData = taskDoc.data();
+        console.log('Email:', taskData.email);
+        console.log('Task Name:', taskData.taskName);
 
-      // Delete the task from the "Tasks" collection
-      await deleteDoc(taskDoc);
+        // Create a new document in the "Completed" collection
+        await addDoc(collection(db, 'Completed'), {
+          email: taskData.email,
+          taskName: taskData.taskName,
+          taskDesc: taskData.taskDesc,
+          taskType: taskData.taskType,
+          dateAndTime: taskData.dateAndTime,
+          completedOn: serverTimestamp(),
+        });
 
-      alert(`Complete todo with id ${id}`);
+        await deleteDoc(taskDocRef);
+
+        console.log('Congratulations on completing the task');
+
+        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+      } else {
+        console.error('Task document does not exist');
+      }
     } catch (error) {
       console.error('Error completing todo:', error.message);
     }
+  };
+
+  const handleCancelEdit = () => {
+    setEditableTask(null);
   };
 
   const filteredTodos = todos.filter(
@@ -104,46 +159,132 @@ const MyToDos = () => {
               flexDirection: 'column',
             }}
           >
-            <h3>{todo.name}</h3>
-            <p>{todo.description}</p>
-            <p><strong>Date:</strong> {todo.date}</p>
-            <p><strong>Time:</strong> {todo.time}</p>
-            <p><strong>Type:</strong> {todo.type}</p>
-            <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
-              <button
-                style={{
-                  backgroundColor: '#28a745',
-                  color: '#fff',
-                  padding: '10px',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                }}
-                onClick={() => handleCompleteTodo(todo.id)}
-              >
-                Complete
-              </button>
-              <div>
-                <button
-                  style={{
-                    backgroundColor: '#007bff',
-                    color: '#fff',
+            {editableTask === todo.id ? (
+              <>
+                <input
+                  type="text"
+                  value={todo.name}
+                  onChange={(e) => {
+                    const updatedName = e.target.value;
+                    setTodos((prevTodos) =>
+                      prevTodos.map((prevTodo) =>
+                        prevTodo.id === todo.id ? { ...prevTodo, name: updatedName } : prevTodo
+                      )
+                    );
                   }}
-                  onClick={() => handleEditTodo(todo.id)}
-                >
-                  Edit
-                </button>
-                <button
-                  style={{
-                    backgroundColor: '#dc3545',
-                    color: '#fff',
+                />
+                <textarea
+                  value={todo.description}
+                  onChange={(e) => {
+                    const updatedDescription = e.target.value;
+                    setTodos((prevTodos) =>
+                      prevTodos.map((prevTodo) =>
+                        prevTodo.id === todo.id ? { ...prevTodo, description: updatedDescription } : prevTodo
+                      )
+                    );
                   }}
-                  onClick={() => handleDeleteTodo(todo.id)}
+                />
+                <input
+                  type="type"
+                  value={todo.name}
+                  onChange={(e) => {
+                    const updatedName = e.target.value;
+                    setTodos((prevTodos) =>
+                      prevTodos.map((prevTodo) =>
+                        prevTodo.id === todo.id ? { ...prevTodo, name: updatedName } : prevTodo
+                      )
+                    );
+                  }}
+                />
+                <input
+                  type="date"
+                  value={todo.name}
+                  onChange={(e) => {
+                    const updatedName = e.target.value;
+                    setTodos((prevTodos) =>
+                      prevTodos.map((prevTodo) =>
+                        prevTodo.id === todo.id ? { ...prevTodo, name: updatedName } : prevTodo
+                      )
+                    );
+                  }}
+                />
+                <input
+                  type="time"
+                  value={todo.name}
+                  onChange={(e) => {
+                    const updatedName = e.target.value;
+                    setTodos((prevTodos) =>
+                      prevTodos.map((prevTodo) =>
+                        prevTodo.id === todo.id ? { ...prevTodo, name: updatedName } : prevTodo
+                      )
+                    );
+                  }}
+                />
+                <button
+                  onClick={() =>
+                    handleUpdateTodo(todo.id, {
+                      taskName: todo.name,
+                      taskDesc: todo.description,
+                      taskType: todo.type,
+                      dateAndTime: todo.dateAndTime,
+                      email: todo.email,
+                    })
+                  }
                 >
-                  Delete
+                  Update
                 </button>
-              </div>
-            </div>
+                <button onClick={handleCancelEdit}>Cancel</button>
+              </>
+            ) : (
+              <>
+                <h3>{todo.name}</h3>
+                <p>{todo.description}</p>
+                <p>
+                  <strong>Date:</strong> {todo.date}
+                </p>
+                <p>
+                  <strong>Time:</strong> {todo.time}
+                </p>
+                <p>
+                  <strong>Type:</strong> {todo.type}
+                </p>
+                <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                  <button
+                    style={{
+                      backgroundColor: '#28a745',
+                      color: '#fff',
+                      padding: '10px',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleCompleteTodo(todo.id)}
+                  >
+                    Complete
+                  </button>
+                  <div>
+                    <button
+                      style={{
+                        backgroundColor: '#007bff',
+                        color: '#fff',
+                      }}
+                      onClick={() => handleEditTodo(todo.id)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      style={{
+                        backgroundColor: '#dc3545',
+                        color: '#fff',
+                      }}
+                      onClick={() => handleDeleteTodo(todo.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </li>
         ))}
       </ul>

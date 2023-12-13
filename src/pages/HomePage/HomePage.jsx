@@ -93,7 +93,7 @@ const HomePage = () => {
                     <Link
                       className="nav-link text-black sidebar-options d-flex align-items-baseline gap-2 rounded-pill"
                       data-menu="student"
-                      to="/"
+                      to="/trash"
                     >
                       <i className="bi bi-trash-fill"></i>
                       Trash

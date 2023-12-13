@@ -7,6 +7,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import TodoList from "./components/TodoList";
 import CalendarPage from "./pages/CalendarPage/CalendarPage";
 import Completed from "./pages/Completed";
+import Trash from "./pages/Trash";
 
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/completed" element={<Completed />} />
         <Route path="/forgot" element={<ForgotPassword />} />
-        <Route path="/test" element={<TodoList />} />
+        <Route path="/trash" element={<Trash />} />
       </Routes>
     </React.Fragment>
   );

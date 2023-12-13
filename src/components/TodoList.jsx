@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection,setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase-config";
 import "../styles/global.css";
 
@@ -64,17 +64,23 @@ const TodoList = () => {
         taskTime
       ) {
         const user = auth.currentUser;
-
+  
         if (user) {
           // Create a new document in the "Tasks" collection
-          await addDoc(collection(db, "Tasks"), {
+          const docRef = await addDoc(collection(db, "Tasks"), {
             email: user.email,
             taskName: inputTitle,
             taskDesc: inputDescription,
             taskType: taskType,
             dateAndTime: new Date(`${taskDate} ${taskTime}`).toISOString(),
           });
-
+  
+          // Retrieve the auto-generated ID
+          const newTaskId = docRef.id;
+  
+          // Update the document with the "id" field
+          await setDoc(docRef, { id: newTaskId }, { merge: true });
+  
           // Clear the form inputs
           setInputTitle("");
           setInputDescription("");
@@ -82,14 +88,15 @@ const TodoList = () => {
           setTaskDate("");
           setTaskTime("");
           setExpandInput(false);
-
-          alert ('Task Successfully Added');
+  
+          alert(`Task Successfully Added with`);
         }
       }
     } catch (error) {
       console.error("Error adding task:", error.message);
     }
   };
+  
 
   return (
     <div className="container mt-4">

@@ -4,7 +4,7 @@ import { db, auth } from '../firebase-config';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
 
-const Completed = () => {
+const Trash = () => {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +14,7 @@ const Completed = () => {
         const user = auth.currentUser;
 
         if (user) {
-          const q = query(collection(db, 'Completed'), where('email', '==', user.email));
+          const q = query(collection(db, 'Trash'), where('email', '==', user.email));
           const querySnapshot = await getDocs(q);
 
           const userCompletedTasks = querySnapshot.docs.map((doc) => {
@@ -175,4 +175,4 @@ const Completed = () => {
   );
 };
 
-export default Completed;
+export default Trash;
